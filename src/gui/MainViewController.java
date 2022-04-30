@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 
@@ -38,7 +39,7 @@ public class MainViewController implements Initializable {
 
 	@FXML
 	public void onMenuItemDepartamentoAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 
 	@FXML
@@ -74,11 +75,39 @@ public class MainViewController implements Initializable {
 			// O metodo getRoot pega o primeiro elemento da view
 			VBox mainVbox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent(); // Pega a referência para o Vbox que
 																					// está na janela principal
-			
+
 			Node mainMenu = mainVbox.getChildren().get(0); // Primeiro filho do Vbox da janela principal o Main Menu.
 			mainVbox.getChildren().clear(); // Limpa todos os fihos do main Vbox
 			mainVbox.getChildren().add(mainMenu); // Adiciona o main menu
-			mainVbox.getChildren().addAll(newVBox.getChildren()); // Adiciona os filhos do new VOX (a janela que estiver abrindo que veio na referencia)
+			mainVbox.getChildren().addAll(newVBox.getChildren()); // Adiciona os filhos do new VOX (a janela que estiver
+																	// abrindo que veio na referencia)
+		} catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
+		} catch (IllegalStateException e) {
+			Alerts.showAlert("IO Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
+		}
+	}
+
+	private synchronized void loadView2(String absoluteName) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVBox = loader.load();
+
+			Scene mainScene = Main.getMainScene(); // pega a cena principal da classe main
+			// O metodo getRoot pega o primeiro elemento da view
+			VBox mainVbox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent(); // Pega a referência para o Vbox que
+																					// está na janela principal
+
+			Node mainMenu = mainVbox.getChildren().get(0); // Primeiro filho do Vbox da janela principal o Main Menu.
+			mainVbox.getChildren().clear(); // Limpa todos os fihos do main Vbox
+			mainVbox.getChildren().add(mainMenu); // Adiciona o main menu
+			mainVbox.getChildren().addAll(newVBox.getChildren()); // Adiciona os filhos do new VOX (a janela que estiver
+																	// abrindo que veio na referencia)
+
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Erro loading view", e.getMessage(), AlertType.ERROR);
 		} catch (IllegalStateException e) {
