@@ -50,7 +50,8 @@ public class DepartmentListController implements Initializable {
 	@FXML
 	private void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);// pegar refenencia para o Stage atual
-		createDialogForm("/gui/DepartmentForm.fxml", parentStage);// para para criar a janela
+		Department obj = new Department();
+		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);// para para criar a janela
 	}
 
 	// principio solid de inversão de controle
@@ -80,19 +81,23 @@ public class DepartmentListController implements Initializable {
 		if (service == null) {
 			throw new IllegalStateException("Service was null");
 		}
-		
+
 		List<Department> list = service.fidAll();
 		obslist = FXCollections.observableArrayList(list); // Instancia o observable list pegando os dados da lista
 		tableViewDepartment.setItems(obslist);
 	}
-	
+
 	// Janela de diálogo (modal)
-	private void createDialogForm(String absoluteName,Stage parentStage) {
+	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
 		// logica para abrir a janela de formulário
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));// Pegar a view
 			Pane pane = loader.load();// Carregar a view
 			
+			DepartmentFormController controller = loader.getController();// Pegar a referência do controller do formulario
+			controller.setDepartment(obj);
+			controller.updateFormData();
+
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle("Entrada de dados do departamento");
 			dialogStage.setScene(new Scene(pane));
@@ -100,8 +105,7 @@ public class DepartmentListController implements Initializable {
 			dialogStage.initOwner(parentStage); // Stage pai da janela
 			dialogStage.initModality(Modality.WINDOW_MODAL);
 			dialogStage.showAndWait();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
 	}
